@@ -6,19 +6,35 @@ pub struct Program {
     pub kind: String,
 }
 #[derive(Debug)]
+pub enum ExprTypes {
+    BinaryExpr,
+    Identifier,
+    NumberLiteral,
+    NullLiteral,
+}
+#[derive(Debug)]
 pub enum Expr {
     BinaryExpr {
-        kind: String,
+        kind: ExprTypes,
         left: Box<Expr>,
         right: Box<Expr>,
         operator: String,
     },
     Identifier {
-        kind: String,
+        kind: ExprTypes,
         value: String,
     },
     NumberLiteral {
-        kind: String,
+        kind: ExprTypes,
         value: i64,
     },
+    NullLiteral {
+        kind: ExprTypes,
+        value: String,
+    },
+}
+#[derive(Debug)]
+pub struct NumberLiteral {
+    pub kind: ExprTypes,
+    pub value: i64,
 }

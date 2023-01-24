@@ -4,6 +4,7 @@ use std::collections::{HashMap, VecDeque};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TokenType {
+    Null,
     Number,
     Identifier,
     Let,
@@ -23,7 +24,7 @@ pub enum TokenType {
 }
 
 pub fn keywords() -> HashMap<&'static str, TokenType> {
-    return HashMap::from([("let", TokenType::Let)]);
+    return HashMap::from([("let", TokenType::Let), ("null", TokenType::Null)]);
 }
 
 #[derive(Debug, Clone)]
@@ -102,9 +103,10 @@ pub fn tokenize(source_code: String) -> VecDeque<Token> {
                 } else {
                     t.push_back(Token::new(ident, TokenType::Identifier));
                 }
-            } else if s[0] == '\t' || s[0] == ' ' {
+            } else if s[0] == '\t' || s[0] == ' ' || s[0] == '\r' {
                 s.pop_front().unwrap();
             } else if s[0] == '\n' {
+                s.pop_front().unwrap();
                 line += 1;
             } else {
                 panic!("Unrecognised character {} at line {line}", s[0]);

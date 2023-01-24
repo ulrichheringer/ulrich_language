@@ -1,6 +1,8 @@
 use std::collections::VecDeque;
 
 use crate::ast::Expr;
+use crate::ast::ExprTypes;
+use crate::ast::NumberLiteral;
 use crate::ast::Program;
 use crate::lexer::tokenize;
 use crate::lexer::Token;
@@ -45,7 +47,7 @@ impl Parser {
             let operator = self.eat().value;
             let right = self.parse_multiplicative_expr();
             left = Expr::BinaryExpr {
-                kind: "BinaryExpr".to_string(),
+                kind: ExprTypes::BinaryExpr,
                 left: Box::new(left),
                 right: Box::new(right),
                 operator,
@@ -59,7 +61,7 @@ impl Parser {
             let operator = self.eat().value;
             let right = self.parse_primary();
             left = Expr::BinaryExpr {
-                kind: "BinarExpr".to_string(),
+                kind: ExprTypes::BinaryExpr,
                 left: Box::new(left),
                 right: Box::new(right),
                 operator,
@@ -70,7 +72,7 @@ impl Parser {
     fn parse_primary(&mut self) -> Expr {
         match self.tokens[0].ttype {
             TokenType::Number => Expr::NumberLiteral {
-                kind: "NumberLiteral".to_string(),
+                kind: ExprTypes::NumberLiteral,
                 value: self
                     .tokens
                     .pop_front()
@@ -80,7 +82,7 @@ impl Parser {
                     .unwrap(),
             },
             TokenType::Identifier => Expr::Identifier {
-                kind: "Identifier".to_string(),
+                kind: ExprTypes::Identifier,
                 value: self.tokens.pop_front().unwrap().value.to_string(),
             },
             TokenType::OpenParen => {
@@ -88,6 +90,13 @@ impl Parser {
                 let value = self.parse_additive_expr();
                 self.expect(TokenType::CloseParen);
                 return value;
+            }
+            TokenType::Null => {
+                self.eat();
+                return Expr::NullLiteral {
+                    kind: ExprTypes::NullLiteral,
+                    value: "null".to_string(),
+                };
             }
             _ => panic!("Não entendi"),
         }
