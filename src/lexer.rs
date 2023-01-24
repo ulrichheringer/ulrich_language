@@ -2,7 +2,7 @@
 use core::panic;
 use std::collections::{HashMap, VecDeque};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TokenType {
     Number,
     Identifier,
@@ -28,8 +28,8 @@ pub fn keywords() -> HashMap<&'static str, TokenType> {
 
 #[derive(Debug, Clone)]
 pub struct Token {
-    value: String,
-    ttype: TokenType,
+    pub value: String,
+    pub ttype: TokenType,
 }
 
 impl Token {
