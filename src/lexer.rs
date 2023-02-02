@@ -7,6 +7,7 @@ pub enum TokenType {
     Null,
     Number,
     Identifier,
+    Text,
     Let,
     //Const,
     Equals,
@@ -81,6 +82,16 @@ pub fn tokenize(source_code: String) -> VecDeque<Token> {
             push_token(&mut t, &mut s, TokenType::Comma);
         } else if s[0] == '.' {
             push_token(&mut t, &mut s, TokenType::Dot);
+        } else if s[0] == '\"' {
+            let mut text: String = String::new();
+            s.pop_front().unwrap();
+            while s.len() > 0 && s[0] != '\"' {
+                if let Some(r) = s.pop_front() {
+                    text.push(r);
+                }
+            }
+            s.pop_front().unwrap();
+            t.push_back(Token::new(text, TokenType::Text));
         } else {
             if s[0].is_numeric() {
                 let mut num: String = String::new();
@@ -91,6 +102,7 @@ pub fn tokenize(source_code: String) -> VecDeque<Token> {
                 }
                 t.push_back(Token::new(num, TokenType::Number));
             } else if s[0].is_alphabetic() {
+                println!("it came here");
                 let mut ident: String = String::new();
                 while s.len() > 0 && s[0].is_alphabetic() {
                     if let Some(r) = s.pop_front() {
