@@ -11,6 +11,7 @@ pub enum ExprTypes {
     Identifier,
     NumberLiteral,
     NullLiteral,
+    TextLiteral,
 }
 #[derive(Debug)]
 pub enum Expr {
@@ -30,6 +31,9 @@ pub enum Expr {
     },
     NullLiteral {
         kind: ExprTypes,
+        value: String,
+    },
+    TextLiteral {
         value: String,
     },
 }

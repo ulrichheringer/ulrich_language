@@ -70,6 +70,9 @@ impl Parser {
         return left;
     }
     fn parse_primary(&mut self) -> Expr {
+        /* for i in &self.tokens {
+            println!("{:#?}", i);
+        }*/
         match self.tokens[0].ttype {
             TokenType::Number => Expr::NumberLiteral {
                 kind: ExprTypes::NumberLiteral,
@@ -83,10 +86,16 @@ impl Parser {
             },
             TokenType::Identifier => Expr::Identifier {
                 kind: ExprTypes::Identifier,
-                value: self.tokens.pop_front().unwrap().value.to_string(),
+                value: self.eat().value.to_string(),
+            },
+            TokenType::Text => Expr::TextLiteral {
+                value: self.eat().value.to_string(),
             },
             TokenType::OpenParen => {
                 self.eat();
+                if self.at().ttype == TokenType::EOF {
+                    panic!("No content after opening parenthesis");
+                }
                 let value = self.parse_additive_expr();
                 self.expect(TokenType::CloseParen);
                 return value;
@@ -98,7 +107,10 @@ impl Parser {
                     value: "null".to_string(),
                 };
             }
-            _ => panic!("Não entendi"),
+            _ => panic!(
+                "Unexpected token {:#?} {:#?}",
+                self.tokens[0].value, self.tokens[0].ttype
+            ),
         }
     }
     pub fn produce_ast(&mut self, source_code: String) -> Program {

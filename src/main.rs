@@ -16,7 +16,6 @@ fn main() {
     loop {
         let mut input = String::new();
         print!("> ");
-
         std::io::stdout().flush().unwrap();
         std::io::stdin().read_line(&mut input).unwrap();
         std::io::stdout().flush().unwrap();
@@ -25,8 +24,17 @@ fn main() {
             println!("Exited sucessfully");
             break;
         }
+
         let program = parser.produce_ast(input);
         let result = eval_program(program);
-        println!("{:#?}", result);
+        if let Some(values::RuntimeVal::NumberVal { kind: _, value }) = result {
+            println!("{}", value);
+        } else if let Some(values::RuntimeVal::IdentVal { kind: _, value }) = result {
+            println!("{}", value);
+        } else if let Some(values::RuntimeVal::TextVal { value }) = result {
+            println!("\"{}\"", value);
+        } else {
+            println!("nil");
+        }
     }
 }

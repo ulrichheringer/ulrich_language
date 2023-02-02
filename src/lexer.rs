@@ -102,7 +102,6 @@ pub fn tokenize(source_code: String) -> VecDeque<Token> {
                 }
                 t.push_back(Token::new(num, TokenType::Number));
             } else if s[0].is_alphabetic() {
-                println!("it came here");
                 let mut ident: String = String::new();
                 while s.len() > 0 && s[0].is_alphabetic() {
                     if let Some(r) = s.pop_front() {
