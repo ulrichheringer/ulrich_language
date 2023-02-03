@@ -11,20 +11,20 @@ mod lexer;
 mod parser;
 mod values;
 
-fn main() {
+/*fn main() {
     let mut env = environment::Environment::new();
     env.push_var("abc".to_string(), "123".to_string());
     if let Some(result) = env.lookup_var("abc".to_string()) {
         println!("{}", result);
     };
     let mut parserr = parser::Parser::new();
-    let program = parserr.produce_ast("let abc = \"simple string\"".to_string());
+    let program = parserr.produce_ast("let abc = \"simple string\" 123 abc".to_string());
     for i in &program.body {
         println!("{:#?}", i);
     }
-}
+}*/
 
-/*fn main() {
+fn main() {
     let mut parser = Parser::new();
     println!("REPL v0.1");
     loop {
@@ -51,4 +51,4 @@ fn main() {
             println!("nil");
         }
     }
-}*/
+}

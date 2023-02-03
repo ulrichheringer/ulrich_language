@@ -83,10 +83,14 @@ impl Parser {
                     .parse::<i64>()
                     .unwrap(),
             },
-            TokenType::Identifier => Expr::Identifier {
-                kind: ExprTypes::Identifier,
-                value: self.eat().value.to_string(),
-            },
+            TokenType::Identifier => {
+                if let Some(r) = self.env.lookup_var(self.at().value) {
+                    self.eat();
+                    return Expr::TextLiteral { value: r };
+                } else {
+                    panic!("Implementation after, but couldn't find this var");
+                }
+            }
             TokenType::Let => {
                 self.eat();
                 match self.expect(TokenType::Identifier) {
