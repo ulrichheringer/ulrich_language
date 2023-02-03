@@ -2,20 +2,23 @@ use std::collections::VecDeque;
 
 use crate::ast::Expr;
 use crate::ast::ExprTypes;
-use crate::ast::NumberLiteral;
+//use crate::ast::NumberLiteral;
 use crate::ast::Program;
+use crate::environment::Environment;
 use crate::lexer::tokenize;
 use crate::lexer::Token;
 use crate::lexer::TokenType;
 
 pub struct Parser {
     tokens: VecDeque<Token>,
+    env: Environment,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
             tokens: VecDeque::<Token>::new(),
+            env: Environment::new(),
         }
     }
     fn at(&self) -> Token {
@@ -28,15 +31,11 @@ impl Parser {
             panic!("error while eating");
         }
     }
-    fn expect(&mut self, expectedtype: TokenType) -> Token {
-        if let Some(prev) = self.tokens.pop_front() {
-            if prev.ttype != expectedtype {
-                panic!("Expected {:#?} found {:#?}", expectedtype, prev);
-            }
-            return prev;
-        } else {
-            panic!("Error expecting");
+    fn expect(&mut self, expectedtype: TokenType) -> Option<Token> {
+        if self.at().ttype != expectedtype {
+            return None;
         }
+        return Some(self.eat());
     }
     fn is_eof(&mut self) -> bool {
         return self.tokens[0].ttype == TokenType::EOF;
@@ -88,6 +87,34 @@ impl Parser {
                 kind: ExprTypes::Identifier,
                 value: self.eat().value.to_string(),
             },
+            TokenType::Let => {
+                self.eat();
+                match self.expect(TokenType::Identifier) {
+                    Some(ident) => match self.expect(TokenType::Equals) {
+                        Some(_) => {
+                            match self.expect(TokenType::Number) {
+                                Some(number) => {
+                                    self.env.push_var(ident.value.clone(), number.value.clone());
+                                    return Expr::NumberLiteral {
+                                        kind: ExprTypes::NumberLiteral,
+                                        value: number.value.parse::<i64>().unwrap(),
+                                    };
+                                }
+                                None => (),
+                            }
+                            match self.expect(TokenType::Text) {
+                                Some(text) => {
+                                    self.env.push_var(ident.value.clone(), text.value.clone());
+                                    return Expr::TextLiteral { value: text.value };
+                                }
+                                None => panic!("No value found in let declaration"),
+                            }
+                        }
+                        None => panic!("Missing equal symbol in let declaration"),
+                    },
+                    None => panic!("Missing identifier in let declaration"),
+                };
+            }
             TokenType::Text => Expr::TextLiteral {
                 value: self.eat().value.to_string(),
             },
@@ -97,8 +124,11 @@ impl Parser {
                     panic!("No content after opening parenthesis");
                 }
                 let value = self.parse_additive_expr();
-                self.expect(TokenType::CloseParen);
-                return value;
+                if let Some(_) = self.expect(TokenType::CloseParen) {
+                    return value;
+                } else {
+                    panic!("Missing closing parenthesis");
+                }
             }
             TokenType::Null => {
                 self.eat();
