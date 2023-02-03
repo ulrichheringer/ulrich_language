@@ -27,6 +27,7 @@ mod values;
 fn main() {
     let mut parser = Parser::new();
     println!("REPL v0.1");
+    std::process::Command::new("clear").status().unwrap();
     loop {
         let mut input = String::new();
         print!("> ");
