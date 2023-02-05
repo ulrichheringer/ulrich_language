@@ -49,6 +49,7 @@ fn main() {
         } else if let Some(values::RuntimeVal::TextVal { value }) = result {
             println!("\"{}\"", value);
         } else {
+            //println!("nil {:#?}", result);
             println!("nil");
         }
     }

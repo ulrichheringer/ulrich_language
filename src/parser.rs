@@ -5,6 +5,7 @@ use crate::ast::ExprTypes;
 //use crate::ast::NumberLiteral;
 use crate::ast::Program;
 use crate::environment::Environment;
+use crate::environment::VariableType;
 use crate::lexer::tokenize;
 use crate::lexer::Token;
 use crate::lexer::TokenType;
@@ -86,36 +87,58 @@ impl Parser {
             TokenType::Identifier => {
                 if let Some(r) = self.env.lookup_var(self.at().value) {
                     self.eat();
-                    return Expr::TextLiteral { value: r };
+                    if let VariableType::Integer = r.vtype {
+                        return Expr::NumberLiteral {
+                            kind: ExprTypes::NumberLiteral,
+                            value: r.content.parse::<i64>().unwrap(),
+                        };
+                    } else {
+                        return Expr::TextLiteral { value: r.content };
+                    }
                 } else {
-                    panic!("Implementation after, but couldn't find this var");
+                    panic!("Error will be implemented after, but couldn't find this var");
                 }
             }
             TokenType::Let => {
                 self.eat();
                 match self.expect(TokenType::Identifier) {
-                    Some(ident) => match self.expect(TokenType::Equals) {
-                        Some(_) => {
-                            match self.expect(TokenType::Number) {
-                                Some(number) => {
-                                    self.env.push_var(ident.value.clone(), number.value.clone());
-                                    return Expr::NumberLiteral {
-                                        kind: ExprTypes::NumberLiteral,
-                                        value: number.value.parse::<i64>().unwrap(),
-                                    };
+                    Some(ident) => {
+                        if let Some(_) = self.env.lookup_var(ident.value.clone()) {
+                            panic!("Variable already set")
+                        } else {
+                            match self.expect(TokenType::Equals) {
+                                Some(_) => {
+                                    match self.expect(TokenType::Number) {
+                                        Some(number) => {
+                                            self.env.push_var(
+                                                ident.value.clone(),
+                                                number.value.clone(),
+                                                VariableType::Integer,
+                                            );
+                                            return Expr::NumberLiteral {
+                                                kind: ExprTypes::NumberLiteral,
+                                                value: number.value.parse::<i64>().unwrap(),
+                                            };
+                                        }
+                                        None => (),
+                                    }
+                                    match self.expect(TokenType::Text) {
+                                        Some(text) => {
+                                            self.env.push_var(
+                                                ident.value.clone(),
+                                                text.value.clone(),
+                                                VariableType::Text,
+                                            );
+                                            return Expr::TextLiteral { value: text.value };
+                                        }
+                                        None => panic!("No value found in let declaration"),
+                                    }
                                 }
-                                None => (),
-                            }
-                            match self.expect(TokenType::Text) {
-                                Some(text) => {
-                                    self.env.push_var(ident.value.clone(), text.value.clone());
-                                    return Expr::TextLiteral { value: text.value };
-                                }
-                                None => panic!("No value found in let declaration"),
+                                None => panic!("Missing equal symbol in let declaration"),
                             }
                         }
-                        None => panic!("Missing equal symbol in let declaration"),
-                    },
+                    }
+
                     None => panic!("Missing identifier in let declaration"),
                 };
             }

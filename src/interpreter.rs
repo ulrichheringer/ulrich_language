@@ -12,6 +12,7 @@ fn eval_numeric_binary_expr(
     if let Some(RuntimeVal::NumberVal { kind: _, value }) = lhs {
         let fstvalue = value;
         if let Some(RuntimeVal::NumberVal { kind: _, value }) = rhs {
+            // MATCH
             if operator == "+" {
                 result = fstvalue + value;
             } else if operator == "-" {
